@@ -5,48 +5,50 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: guroux <guroux@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/11/28 16:43:36 by guroux            #+#    #+#             */
-/*   Updated: 2018/11/28 18:22:48 by guroux           ###   ########.fr       */
+/*   Created: 2018/11/21 16:39:39 by guroux            #+#    #+#             */
+/*   Updated: 2018/11/28 16:42:20 by guroux           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <stdio.h>
 
-char	*readfile(const int fd, char *str)
+int		check_line(char **str, char **line)
 {
-	while((ret = read(fd, buff, BUFF_SIZE)))
+	int				i;
+	char			*tmp;
+
+	i  = 0;
+	while ((*str)[i] != '\0')
 	{
-		buff[ret] = '\0';
-		str = ft_strjoin(str, buff);
+		if ((*str)[i] == '\n')
+		{
+			if (!(*line = ft_strsub(*str, 0, i)))
+				return (-1);
+			tmp = ft_strsub(*str, (i + 1), ft_strlen(*str));
+			ft_strdel(str);
+			*str = tmp;
+			return (1);
+		}
+		i++;
 	}
-	return (str);
+	return (0);
 }
 
-int				get_next_line(const int fd, char **line)
+int		get_next_line(const int fd, char **line)
 {
+	char			buf[BUFF_SIZE + 1];
 	static char		*str;
-	char			*tmp;
-	int				i;
-	char			buff[BUFF_SIZE + 1];
 	int				ret;
-	
-	i = 0;
-	if (str[i])
+
+	if (!str)
+		str = ft_strnew(0);
+	while ((ret = read(fd, buf, BUFF_SIZE)))
 	{
-		while (str[i] != '\n' && str[i])
-			i++;
-		if (i == 0)
-			*line = ft_strnew(0);
-		else
-		{
-			*line = ft_strsub(str, 0, i);
-			tmp = ft_strsub(str, (i + 1), ft_strlen(str));
-			ft_strdel(&str);
-			str = tmp;
-		}
-			return (1);
-	}
-	else
-		*line = ft_strnew(0);
-	return (0);
+		buf[ret] = '\0';
+		str = ft_strjoin(str, buf);
+		check_line(&str, line);
+		return (1);
+	}	
+	return (1);
 }
