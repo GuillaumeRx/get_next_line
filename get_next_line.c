@@ -6,7 +6,7 @@
 /*   By: guroux <guroux@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/11/28 16:43:36 by guroux            #+#    #+#             */
-/*   Updated: 2018/12/03 20:08:06 by guroux           ###   ########.fr       */
+/*   Updated: 2018/12/04 20:56:22 by guroux           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ char	*readfile(const int fd, char *str)
 		if (ret < 1)
 			return (NULL);
 		buff[ret] = '\0';
-		printf("buff: %s\n", buff);
 		if (!(tmp = ft_strjoin(str, buff)))
 			return (NULL);
 		ft_strdel(&str);
@@ -55,7 +54,6 @@ char	*readfile(const int fd, char *str)
 				return (str);
 		i = 0;
 	}
-	printf("str: %s\n", str);
 	return (str);
 }
 
@@ -96,7 +94,6 @@ int		get_next_line(const int fd, char **line)
 	if (!(curr->content = readfile(fd, curr->content)))
 		return (-1);
 	str = curr->content;
-	printf("str :%s\n", str);
 	if (str[0] != '\0')
 		return (cpy_line(line, (char **)&(curr->content)));
 	else
