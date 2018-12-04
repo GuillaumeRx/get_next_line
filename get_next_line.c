@@ -6,12 +6,11 @@
 /*   By: guroux <guroux@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/11/28 16:43:36 by guroux            #+#    #+#             */
-/*   Updated: 2018/11/29 23:20:30 by guroux           ###   ########.fr       */
+/*   Updated: 2018/12/04 19:30:06 by guroux           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
 
 char	*readfile(const int fd, char *str)
 {
@@ -19,23 +18,21 @@ char	*readfile(const int fd, char *str)
 	char			*tmp;
 	int				ret;
 	int				i;
-	int				stop;
 
 	i = 0;
-	stop = 1;
-	while ((ret = read(fd, buff, BUFF_SIZE)) && stop)
+	while ((ret = read(fd, buff, BUFF_SIZE)))
 	{
 		if (ret < 1)
 			return (NULL);
 		buff[ret] = '\0';
-		while (buff[i] && buff[i] != '\n')
-			if (buff[i++] == '\n')
-				stop = 0;
-		i = 0;
 		if (!(tmp = ft_strjoin(str, buff)))
 			return (NULL);
 		ft_strdel(&str);
 		str = tmp;
+		while (buff[i] != '\0')
+			if (buff[i++] == '\n')
+				return (str);
+		i = 0;
 	}
 	return (str);
 }
