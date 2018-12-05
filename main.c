@@ -1,22 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: guroux <guroux@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/11/21 16:36:56 by guroux            #+#    #+#             */
-/*   Updated: 2018/12/05 18:42:35 by guroux           ###   ########.fr       */
+/*   Created: 2018/12/05 22:01:13 by guroux            #+#    #+#             */
+/*   Updated: 2018/12/05 22:19:28 by guroux           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#include "get_next_line.h"
+#include <fcntl.h>
 
-# define BUFF_SIZE  69
+int		main(int ac, char **av)
+{
+	int		fd;
+	char 	*line;
 
-# include "libft/libft.h"
-
-int		get_next_line(const int fd, char **line);
-
-#endif
+	if (ac)
+	{
+		fd = open(av[1], O_RDONLY);
+		while (get_next_line(fd, &line))
+		{
+			ft_putstr(line);
+			ft_putchar('\n');
+			ft_putstr("---\n");
+			ft_strdel(&line);
+		}
+	}
+	return (0);
+}

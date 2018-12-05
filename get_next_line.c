@@ -6,7 +6,7 @@
 /*   By: guroux <guroux@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/11/28 16:43:36 by guroux            #+#    #+#             */
-/*   Updated: 2018/12/04 20:56:22 by guroux           ###   ########.fr       */
+/*   Updated: 2018/12/05 23:36:16 by guroux           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,19 @@ t_list	*select_node(t_list **file, int fd)
 	return (tmp);
 }
 
-//Is reading bytes after the end of file wtf -_-,
+void	del_node(t_list **head, t_list **node)
+{
+	t_list *tmp;
+
+	tmp = *node;
+	printf("yay:%s\n", tmp->content);
+	free(tmp->content);
+	if (node == head)
+		head = &tmp->next;
+	else
+		tmp = tmp->next;
+}
+
 char	*readfile(const int fd, char *str)
 {
 	char			buff[BUFF_SIZE + 1];
@@ -40,10 +52,10 @@ char	*readfile(const int fd, char *str)
 	int				i;
 
 	i = 0;
+	if ((ret = read(fd, buff, 0)) < 0)
+		return (NULL);
 	while ((ret = read(fd, buff, BUFF_SIZE)))
 	{
-		if (ret < 1)
-			return (NULL);
 		buff[ret] = '\0';
 		if (!(tmp = ft_strjoin(str, buff)))
 			return (NULL);
@@ -75,10 +87,18 @@ int		cpy_line(char **line, char **str)
 		if (!(*line = ft_strsub(*str, 0, i)))
 			return (-1);
 	}
-	if (!(tmp = ft_strsub(*str, (i + 1), ft_strlen(*str))))
-		return (-1);
-	ft_strdel(str);
-	*str = tmp;
+	if ((*str)[i])
+	{
+		if (!(tmp = ft_strsub(*str, (i + 1), (ft_strlen(*str) - 1))))
+			return (-1);
+		ft_strdel(str);
+		*str = tmp;
+	}
+	else
+	{
+		if (!(*str = ft_strdup("")))
+			return (-1);
+	}
 	return (1);
 }
 
@@ -87,8 +107,9 @@ int		get_next_line(const int fd, char **line)
 	static t_list		*file;
 	t_list				*curr;
 	char				*str;
+	char				tab[1];
 
-	if (fd < 0 || line == NULL)
+	if (fd < 0 || line == NULL || read(fd, tab, 0) < 0)
 		return (-1);
 	curr = select_node(&file, fd);
 	if (!(curr->content = readfile(fd, curr->content)))
@@ -97,6 +118,6 @@ int		get_next_line(const int fd, char **line)
 	if (str[0] != '\0')
 		return (cpy_line(line, (char **)&(curr->content)));
 	else
-		ft_strdel((char **)&(curr->content));
-		return (0);
+		del_node(&file, &curr);
+	return (0);
 }
