@@ -6,14 +6,13 @@
 /*   By: guroux <guroux@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/11/28 16:43:36 by guroux            #+#    #+#             */
-/*   Updated: 2018/12/05 23:36:16 by guroux           ###   ########.fr       */
+/*   Updated: 2018/12/06 20:43:43 by guroux           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
 
-t_list	*select_node(t_list **file, int fd)
+static t_list	*select_node(t_list **file, int fd)
 {
 	t_list	*tmp;
 
@@ -31,20 +30,28 @@ t_list	*select_node(t_list **file, int fd)
 	return (tmp);
 }
 
-void	del_node(t_list **head, t_list **node)
+static void		del_node(t_list **head, int fd)
 {
 	t_list *tmp;
 
-	tmp = *node;
-	printf("yay:%s\n", tmp->content);
-	free(tmp->content);
-	if (node == head)
-		head = &tmp->next;
-	else
-		tmp = tmp->next;
+	tmp = *head;
+	while ((int)(*head)->content_size != fd && *head)
+	{
+		tmp = *head;
+		*head = (*head)->next;
+	}
+	if (*head && (int)(*head)->content_size == fd)
+	{
+		free((*head)->content);
+		(*head)->content_size = 0;
+		tmp->next = (*head)->next;
+		(*head)->next = NULL;
+		free(*head);
+		*head = NULL;
+	}
 }
 
-char	*readfile(const int fd, char *str)
+static char		*readfile(const int fd, char *str)
 {
 	char			buff[BUFF_SIZE + 1];
 	char			*tmp;
@@ -69,14 +76,10 @@ char	*readfile(const int fd, char *str)
 	return (str);
 }
 
-int		cpy_line(char **line, char **str)
+static int		cpy_line(char **line, char **str, int i)
 {
 	char	*tmp;
-	int		i;
 
-	i = 0;
-	while ((*str)[i] != '\n' && (*str)[i] != '\0')
-		i++;
 	if (i == 0)
 	{
 		if (!(*line = ft_strdup("")))
@@ -102,13 +105,15 @@ int		cpy_line(char **line, char **str)
 	return (1);
 }
 
-int		get_next_line(const int fd, char **line)
+int				get_next_line(const int fd, char **line)
 {
 	static t_list		*file;
 	t_list				*curr;
 	char				*str;
 	char				tab[1];
+	int					i;
 
+	i = 0;
 	if (fd < 0 || line == NULL || read(fd, tab, 0) < 0)
 		return (-1);
 	curr = select_node(&file, fd);
@@ -116,8 +121,12 @@ int		get_next_line(const int fd, char **line)
 		return (-1);
 	str = curr->content;
 	if (str[0] != '\0')
-		return (cpy_line(line, (char **)&(curr->content)));
+	{
+		while (str[i] != '\n' && str[i] != '\0')
+			i++;
+		return (cpy_line(line, (char **)&(curr->content), i));
+	}
 	else
-		del_node(&file, &curr);
+		del_node(&file, fd);
 	return (0);
 }
